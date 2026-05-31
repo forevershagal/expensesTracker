@@ -21,7 +21,8 @@ class ExpenseTracker:
         print('\n-----ФУНКЦИИ-----')
         print('1. Добавление расхода')
         print('2. Подсчет всех расходов')
-        print('3. Выход')
+        print('3. Подсчет расходов по категории')
+        print('4. Выход')
 
     def save_data(self):
         with open(self.filename, 'w', encoding="utf-8") as file:
@@ -36,6 +37,10 @@ class ExpenseTracker:
     def get_total(self):
         return sum(item["amount"] for item in self.expenses)
 
+    def get_total_by_category(self, category):
+        return sum(item["amount"] for item in self.expenses if item["category"] == category)
+
+
     def program(self):
         while True:
             self.say_hello()
@@ -49,13 +54,17 @@ class ExpenseTracker:
                     total_sum = self.get_total()
                     print(f'Сумма всех расходов составила: {total_sum}')
                 elif user_choice == 3:
+                    inp_category = input('Введите категорию товара/услуги: ')
+                    total_sum_category = self.get_total_by_category(inp_category)
+                    print(f'Сумма расходов в категории {inp_category} составила: {total_sum_category}')
+                elif user_choice == 4:
                     print('До свидания!')
                     self.save_data()
                     break
                 else:
-                    print('[СИСТЕМА] Ошибка! Введите число от 1 до 3. Не больше и не меньше :)')
+                    print('[СИСТЕМА] Ошибка! Введите число от 1 до 4. Не больше и не меньше :)')
             except ValueError:
-                print('[СИСТЕМА] Неверный тип ввода. Требуется цифра от 1 до 3. Попробуйте еще раз.')
+                print('[СИСТЕМА] Неверный тип ввода. Требуется цифра от 1 до 4. Попробуйте еще раз.')
 
 
 

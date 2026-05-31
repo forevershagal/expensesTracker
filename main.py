@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+from datetime import datetime
 import json
 import os
 
@@ -6,6 +7,7 @@ import os
 class Expense:
     amount: int
     category: str
+    date: str = ""
 
 class ExpenseTracker:
     def __init__(self):
@@ -17,7 +19,7 @@ class ExpenseTracker:
             with open(self.filename, "r", encoding="utf-8") as file:
                 expenses = json.load(file)
                 print(f"[Система] Данные успешно загружены! Найдено записей: {len(expenses)}")
-                return [Expense(item["amount"], item["category"]) for item in expenses]
+                return [Expense(item["amount"], item["category"], item.get("date", "Дата не указана")) for item in expenses]
         else:
             print("[Система] База данных не найдена. Создан новый пустой список.")
             return []
@@ -37,7 +39,8 @@ class ExpenseTracker:
             json.dump(ready_to_save, file, indent=4, ensure_ascii=False)
 
     def add_expense(self, amount, category):
-        item = Expense(amount, category)
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+        item = Expense(amount, category, current_time)
         self.expenses.append(item)
         self.save_data()
         print(f'Расход {amount} руб. в категории {category} добавлен!')
@@ -47,7 +50,7 @@ class ExpenseTracker:
             print('Список расходов еще пуст!')
         else:
             for i in range(len(self.expenses)):
-                print(f'{i+1}. {self.expenses[i].category}: {self.expenses[i].amount} руб.')
+                print(f'{i+1}. {self.expenses[i].category}: {self.expenses[i].amount} руб. Дата: {self.expenses[i].date}')
 
     def delete_expense(self, index):
         try:

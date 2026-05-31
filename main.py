@@ -1,67 +1,66 @@
 import json
 import os
 
-FILENAME = "expenses.json"
 
-print("Приветствую вас в консольном приложении <Трекер расходов>")
+class ExpenseTracker:
+    def __init__(self):
+        self.filename = "expences.json"
+        self.expenses = self.load_data()
 
-if os.path.exists(FILENAME):
-    with open(FILENAME, "r", encoding="utf-8") as file:
-        expenses = json.load(file)
-    print(f"[Система] Данные успешно загружены! Найдено записей: {len(expenses)}")
-else:
-    expenses = []
-    print("[Система] База данных не найдена. Создан новый пустой список.")
-
-while True:
-    print('\n-----ФУНКЦИИ-----')
-    print('1. Добавление расхода')
-    print('2. Вывод всех расходов')
-    print('3. Подсчет всех расходов')
-    print('4. Подсчет расходов по категории')
-    print('5. Выход')
-
-    try:
-        user_choice = int(input('Введите желаемое действие: '))
-
-        if user_choice == 1:
-            inp_value = int(input('Введите сумму расхода: '))
-            inp_category = input('Введите категорию товара: ')
-            item = {"amount": inp_value, "category": inp_category}
-            expenses.append(item)
-
-            with open(FILENAME, "w", encoding="utf-8") as file:
-                json.dump(expenses, file, indent=4, ensure_ascii=False)
-
-            print(f"Успешно добавлено и сохранено: {inp_value} руб. на категорию {inp_category}")
-
-        elif user_choice == 2:
-            if len(expenses) == 0:
-                print('Ваш список расходов пуст.')
-            else:
-                for i in range(len(expenses)):
-                    print(f'{i + 1}. {expenses[i]["category"]}: {expenses[i]["amount"]} руб.')
-
-        elif user_choice == 3:
-            total_sum = sum([i["amount"] for i in expenses])
-            print(f'Сумма всех расходов составляет: {total_sum} руб.')
-
-        elif user_choice == 4:
-            inp_choice_category = input('Введите вашу категорию: ')
-            category_sum = 0
-
-            for i in range(len(expenses)):
-                if expenses[i]["category"] == inp_choice_category:
-                    print(f'{i + 1}. {expenses[i]["category"]}: {expenses[i]["amount"]} руб.')
-                    category_sum += expenses[i]["amount"]
-            print(f'Итоговые расходы в категории {inp_choice_category}: {category_sum} руб.')
-
-        elif user_choice == 5:
-            print("До свидания!")
-            break
-
+    def load_data(self):
+        if os.path.exists(self.filename):
+            with open(self.filename, "r", encoding="utf-8") as file:
+                expenses = json.load(file)
+                print(f"[Система] Данные успешно загружены! Найдено записей: {len(expenses)}")
+                return expenses
         else:
-            print("Пожалуйста, введите число строго от 1 до 5.")
+            print("[Система] База данных не найдена. Создан новый пустой список.")
+            return []
 
-    except ValueError:
-        print('Ошибка ввода! Убедитесь, что вводите числовые значения.')
+    def say_hello(self):
+        print('\n-----ФУНКЦИИ-----')
+        print('1. Добавление расхода')
+        print('2. Подсчет всех расходов')
+        print('3. Выход')
+
+    def save_data(self):
+        with open(self.filename, 'w', encoding="utf-8") as file:
+            json.dump(self.expenses, file, indent=4, ensure_ascii=False)
+
+    def add_expense(self, amount, category):
+        item = {"amount": amount, "category": category}
+        self.expenses.append(item)
+        self.save_data()
+        print(f'Расход {amount} руб. в категории {category} добавлен!')
+
+    def get_total(self):
+        return sum(item["amount"] for item in self.expenses)
+
+    def program(self):
+        while True:
+            self.say_hello()
+            try:
+                user_choice = int(input('Введите номер программы: '))
+                if user_choice == 1:
+                    inp_amount = int(input('Введите стоимость товара/услуги: '))
+                    inp_category = input('Введите категорию товара/услуги: ')
+                    self.add_expense(inp_amount, inp_category)
+                elif user_choice == 2:
+                    total_sum = self.get_total()
+                    print(f'Сумма всех расходов составила: {total_sum}')
+                elif user_choice == 3:
+                    print('До свидания!')
+                    self.save_data()
+                    break
+                else:
+                    print('[СИСТЕМА] Ошибка! Введите число от 1 до 3. Не больше и не меньше :)')
+            except ValueError:
+                print('[СИСТЕМА] Неверный тип ввода. Требуется цифра от 1 до 3. Попробуйте еще раз.')
+
+
+
+if __name__ == "__main__":
+    expense_tracker = ExpenseTracker()
+    print("Приветствую вас в консольном приложении <Трекер расходов>")
+    expense_tracker.program()
+

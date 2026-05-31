@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+from datetime import datetime
 import json
 import os
 
@@ -6,6 +7,7 @@ import os
 class Expense:
     amount: int
     category: str
+    date: str = ""
 
 class ExpenseTracker:
     def __init__(self):
@@ -17,7 +19,7 @@ class ExpenseTracker:
             with open(self.filename, "r", encoding="utf-8") as file:
                 expenses = json.load(file)
                 print(f"[Система] Данные успешно загружены! Найдено записей: {len(expenses)}")
-                return [Expense(item["amount"], item["category"]) for item in expenses]
+                return [Expense(item["amount"], item["category"], item.get("date", "Дата не указана")) for item in expenses]
         else:
             print("[Система] База данных не найдена. Создан новый пустой список.")
             return []
@@ -27,9 +29,10 @@ class ExpenseTracker:
         print('1. Добавление расхода')
         print('2. Подсчет всех расходов')
         print('3. Подсчет расходов по категории')
-        print('4. Вывод всего списка расходов')
-        print('5. Удаление расхода')
-        print('6. Выход')
+        print('4. Подсчет расходов за сегодня')
+        print('5. Вывод всего списка расходов')
+        print('6. Удаление расхода')
+        print('7. Выход')
 
     def save_data(self):
         with open(self.filename, 'w', encoding="utf-8") as file:
@@ -37,7 +40,8 @@ class ExpenseTracker:
             json.dump(ready_to_save, file, indent=4, ensure_ascii=False)
 
     def add_expense(self, amount, category):
-        item = Expense(amount, category)
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+        item = Expense(amount, category, current_time)
         self.expenses.append(item)
         self.save_data()
         print(f'Расход {amount} руб. в категории {category} добавлен!')
@@ -47,7 +51,7 @@ class ExpenseTracker:
             print('Список расходов еще пуст!')
         else:
             for i in range(len(self.expenses)):
-                print(f'{i+1}. {self.expenses[i].category}: {self.expenses[i].amount} руб.')
+                print(f'{i+1}. {self.expenses[i].category}: {self.expenses[i].amount} руб. Дата: {self.expenses[i].date}')
 
     def delete_expense(self, index):
         try:
@@ -65,6 +69,10 @@ class ExpenseTracker:
 
     def get_total_by_category(self, category):
         return sum(item.amount for item in self.expenses if item.category == category)
+
+    def get_today_total(self):
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        return sum(item.amount for item in self.expenses if item.date.startswith(today_str))
 
 
     def program(self):
@@ -84,18 +92,21 @@ class ExpenseTracker:
                     total_sum_category = self.get_total_by_category(inp_category)
                     print(f'Сумма расходов в категории {inp_category} составила: {total_sum_category}')
                 elif user_choice == 4:
-                    self.print_all_expenses()
+                    total_sum = self.get_today_total()
+                    print(f'Сумма всех расходов за сегодня составила: {total_sum}')
                 elif user_choice == 5:
+                    self.print_all_expenses()
+                elif user_choice == 6:
                     index = int(input('Введите индекс товара в общем списке: '))
                     self.delete_expense(index)
-                elif user_choice == 6:
+                elif user_choice == 7:
                     print('До свидания!')
                     self.save_data()
                     break
                 else:
-                    print('[СИСТЕМА] Ошибка! Введите число от 1 до 6. Не больше и не меньше :)')
+                    print('[СИСТЕМА] Ошибка! Введите число от 1 до 7. Не больше и не меньше :)')
             except ValueError:
-                print('[СИСТЕМА] Неверный тип ввода. Требуется цифра от 1 до 6. Попробуйте еще раз.')
+                print('[СИСТЕМА] Неверный тип ввода. Требуется цифра от 1 до 7. Попробуйте еще раз.')
 
 
 
